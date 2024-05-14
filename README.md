@@ -1,1 +1,3 @@
 # Data-Structures-and-Algorithms
+This repository includes projects related to varied Data Structures and Algorithms and their applications in solving real life problems.
+Some of the used Data Structures include array of structure, linked list, trees, graphs etc....
