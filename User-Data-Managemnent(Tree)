@@ -1,0 +1,1054 @@
+//AVL TREE IMPLEMENTATION
+#include<stdio.h>
+#include<stdlib.h>
+#include<string.h>
+
+typedef enum{NO,YES} SUBSIDY;
+typedef enum{LLH=-2,LH=-1,CH=0,RH=1,RRH=2} BALANCE_FACTOR;
+
+typedef struct Aadhar_Node_Tag
+{
+    char name[20];
+    char address[30];
+    char aadhar_no[13];
+    BALANCE_FACTOR bf;
+    struct Aadhar_Node_Tag *left;
+    struct Aadhar_Node_Tag *right;
+    struct Pan_Node_Tag* pan_ptr;
+}Aadhar_Node;
+
+typedef struct Pan_Node_Tag
+{
+    char name[20];
+    char address[30];
+    char pan_no[12];
+    char aadhar_no[13];
+    BALANCE_FACTOR bf;
+    struct Pan_Node_Tag *left;
+    struct Pan_Node_Tag *right;
+    struct Pan_Node_Tag *next_pan;
+    struct Bank_Account_Tag* bank_ptr;
+}Pan_Node;
+
+typedef struct Bank_Account_Tag
+{
+    char name[20];
+    char bank_name[20];
+    char bank_acc_no[13];
+    char pan_no[12];
+    int balance;
+    BALANCE_FACTOR bf;
+    struct Bank_Account_Tag *left;
+    struct Bank_Account_Tag *right;
+    struct Bank_Account_Tag *next_bank;
+    struct LPG_Tag_List* lpg_ptr;
+}Bank_Acc_Node;
+
+typedef struct LPG_Tag_List
+{
+    char name[20];
+    char bank_acc_no[13];
+    SUBSIDY subsidy;
+    BALANCE_FACTOR bf;
+    struct LPG_Tag_List *left;
+    struct LPG_Tag_List *right;
+    struct LPG_Tag_List *next_lpg;
+}LPG_Node;
+
+//Create Aadhar Node
+Aadhar_Node* Create_Aadhar_Node()
+{
+    Aadhar_Node* nptr = (Aadhar_Node*)malloc(sizeof(Aadhar_Node));
+    nptr->bf = CH;
+    nptr->left = NULL;
+    nptr->right = NULL;
+    nptr->pan_ptr = NULL;
+
+    return nptr;
+}
+
+//Create Pan Node
+Pan_Node* Create_Pan_Node()
+{
+    Pan_Node* nptr = (Pan_Node*)malloc(sizeof(Pan_Node));
+    nptr->bf = CH;
+    nptr->left = NULL;
+    nptr->right = NULL;
+    nptr->bank_ptr = NULL;
+    nptr->next_pan = NULL;
+
+    return nptr;
+}
+
+//Create Bank Node
+Bank_Acc_Node* Create_Bank_Node()
+{
+    Bank_Acc_Node* nptr =(Bank_Acc_Node*)malloc(sizeof(Bank_Acc_Node));
+    nptr->bf = CH;
+    nptr->left = NULL;
+    nptr->right = NULL;
+    nptr->lpg_ptr = NULL;
+    nptr->next_bank = NULL;
+
+    return nptr;
+}
+
+//Create Lpg Node
+LPG_Node* Create_Lpg_Node()
+{
+    LPG_Node* nptr = (LPG_Node*)malloc(sizeof(LPG_Node));
+    nptr->bf = CH;
+    nptr->left = NULL;
+    nptr->right = NULL;
+    nptr->subsidy = NO;
+    nptr->next_lpg = NULL;
+
+    return nptr;
+}
+
+//Height of Aadhar tree node
+int Height_Aadhar(Aadhar_Node* root)
+{
+    int ret_val = -1;
+
+    if(root!=NULL)
+    {
+        if(root->left==NULL && root->right==NULL){
+            ret_val = 0;
+        }
+        else{
+            int h1,h2;
+            h1 = Height_Aadhar(root->left);
+            h2 = Height_Aadhar(root->right);
+
+            if(h1<h2){
+                ret_val = 1+h2;
+            }
+            else{
+                ret_val = 1+h1;
+            }
+        }
+    }
+
+    return ret_val;
+}
+
+//Height of Pan tree node
+int Height_Pan(Pan_Node* root)
+{
+    int ret_val = -1;
+
+    if(root!=NULL)
+    {
+        if(root->left==NULL && root->right==NULL){
+            ret_val = 0;
+        }
+        else{
+            int h1,h2;
+            h1 = Height_Pan(root->left);
+            h2 = Height_Pan(root->right);
+
+            if(h1<h2){
+                ret_val = 1+h2;
+            }
+            else{
+                ret_val = 1+h1;
+            }
+        }
+    }
+
+    return ret_val;
+}
+
+//Height of Bank tree node
+int Height_Bank(Bank_Acc_Node* root)
+{
+    int ret_val = -1;
+
+    if(root!=NULL)
+    {
+        if(root->left==NULL && root->right==NULL){
+            ret_val = 0;
+        }
+        else{
+            int h1,h2;
+            h1 = Height_Bank(root->left);
+            h2 = Height_Bank(root->right);
+
+            if(h1<h2){
+                ret_val = 1+h2;
+            }
+            else{
+                ret_val = 1+h1;
+            }
+        }
+    }
+
+    return ret_val;
+}
+
+//Height of Lpg tree node
+int Height_Lpg(LPG_Node* root)
+{
+    int ret_val = -1;
+
+    if(root!=NULL)
+    {
+        if(root->left==NULL && root->right==NULL){
+            ret_val = 0;
+        }
+        else{
+            int h1,h2;
+            h1 = Height_Lpg(root->left);
+            h2 = Height_Lpg(root->right);
+
+            if(h1<h2){
+                ret_val = 1+h2;
+            }
+            else{
+                ret_val = 1+h1;
+            }
+        }
+    }
+
+    return ret_val;
+}
+
+//Calculate Balance Factors for AADHAR node
+void Calculate_Bf_Aadhar(Aadhar_Node* root)
+{
+    if(root!=NULL)
+    {
+        root->bf = Height_Aadhar(root->right) - Height_Aadhar(root->left);
+    }
+}
+
+//Calculate Balance Factors for PAN node
+void Calculate_Bf_Pan(Pan_Node* root)
+{
+    if(root!=NULL)
+    {
+        root->bf = Height_Pan(root->right) - Height_Pan(root->left);
+    }
+}
+
+//Calculate Balance Factors for BANK node
+void Calculate_Bf_Bank(Bank_Acc_Node* root)
+{
+    if(root!=NULL)
+    {
+        root->bf = Height_Bank(root->right) - Height_Bank(root->left);
+    }
+}
+
+//Calculate Balance Factors for LPG node
+void Calculate_Bf_Lpg(LPG_Node* root)
+{
+    if(root!=NULL)
+    {
+        root->bf = Height_Lpg(root->right) - Height_Lpg(root->left);
+    }
+}
+
+//Left Rotate For AADHAR
+Aadhar_Node* RotateLeft_Aadhar(Aadhar_Node* r)
+{
+    Aadhar_Node* tnode = r->right;
+    //printf("Rotate left for: %s and tnode: %s\n",r->aadhar_no,tnode->aadhar_no);
+
+    if(r==NULL || r->right==NULL){
+        printf("RotateRight::Error condition!!\n");
+    }
+    else{
+        r->right = tnode->left;
+        tnode->left = r;
+    }
+    Calculate_Bf_Aadhar(tnode);
+    Calculate_Bf_Aadhar(r);
+
+    return tnode;
+}
+
+//Right Rotate For AADHAR
+Aadhar_Node* RotateRight_Aadhar(Aadhar_Node* r)
+{
+    Aadhar_Node* tnode = r->left;
+    //printf("Rotate right for: %s and tnode: %s\n",r->aadhar_no,tnode->aadhar_no);
+
+    if(r==NULL || r->left==NULL){
+        printf("RotateLeft::Error condition!!\n");
+    }
+    else{
+        r->left = tnode->right;
+        tnode->right = r;
+    }
+    Calculate_Bf_Aadhar(tnode);
+    Calculate_Bf_Aadhar(r);
+    
+    return tnode;
+}
+
+//Left Rotate For PAN
+Pan_Node* RotateLeft_Pan(Pan_Node* r)
+{
+    Pan_Node* tnode = r->right;
+    //printf("Rotate left for: %s and tnode: %s\n",r->pan_no,tnode->pan_no);
+
+    if(r==NULL || r->right==NULL){
+        printf("RotateRight::Error condition!!\n");
+    }
+    else{
+        r->right = tnode->left;
+        tnode->left = r;
+    }
+    Calculate_Bf_Pan(tnode);
+    Calculate_Bf_Pan(r);
+
+    return tnode;
+}
+
+//Right Rotate For PAN
+Pan_Node* RotateRight_Pan(Pan_Node* r)
+{
+    Pan_Node* tnode = r->left;
+    //printf("Rotate right for: %s and tnode: %s\n",r->pan_no,tnode->pan_no);
+
+    if(r==NULL || r->left==NULL){
+        printf("RotateLeft::Error condition!!\n");
+    }
+    else{
+        r->left = tnode->right;
+        tnode->right = r;
+    }
+    Calculate_Bf_Pan(tnode);
+    Calculate_Bf_Pan(r);
+    
+    return tnode;
+}
+
+//Left Rotate For BANK
+Bank_Acc_Node* RotateLeft_Bank(Bank_Acc_Node* r)
+{
+    Bank_Acc_Node* tnode = r->right;
+    //printf("Rotate left for: %s and tnode: %s\n",r->bank_acc_no,tnode->bank_acc_no);
+
+    if(r==NULL || r->right==NULL){
+        printf("RotateRight::Error condition!!\n");
+    }
+    else{
+        r->right = tnode->left;
+        tnode->left = r;
+    }
+    Calculate_Bf_Bank(tnode);
+    Calculate_Bf_Bank(r);
+
+    return tnode;
+}
+
+//Right Rotate For BANK
+Bank_Acc_Node* RotateRight_Bank(Bank_Acc_Node* r)
+{
+    Bank_Acc_Node* tnode = r->left;
+    //printf("Rotate right for: %s and tnode: %s\n",r->bank_acc_no,tnode->bank_acc_no);
+
+    if(r==NULL || r->left==NULL){
+        printf("RotateLeft::Error condition!!\n");
+    }
+    else{
+        r->left = tnode->right;
+        tnode->right = r;
+    }
+    Calculate_Bf_Bank(tnode);
+    Calculate_Bf_Bank(r);
+    
+    return tnode;
+}
+
+//Left Rotate For LPG
+LPG_Node* RotateLeft_Lpg(LPG_Node* r)
+{
+    LPG_Node* tnode = r->right;
+    //printf("Rotate left for: %s and tnode: %s\n",r->bank_acc_no,tnode->bank_acc_no);
+
+    if(r==NULL || r->right==NULL){
+        printf("RotateRight::Error condition!!\n");
+    }
+    else{
+        r->right = tnode->left;
+        tnode->left = r;
+    }
+    Calculate_Bf_Lpg(tnode);
+    Calculate_Bf_Lpg(r);
+
+    return tnode;
+}
+
+//Right Rotate For LPG
+LPG_Node* RotateRight_Lpg(LPG_Node* r)
+{
+    LPG_Node* tnode = r->left;
+    //printf("Rotate right for: %s and tnode: %s\n",r->bank_acc_no,tnode->bank_acc_no);
+
+    if(r==NULL || r->left==NULL){
+        printf("RotateLeft::Error condition!!\n");
+    }
+    else{
+        r->left = tnode->right;
+        tnode->right = r;
+    }
+    Calculate_Bf_Lpg(tnode);
+    Calculate_Bf_Lpg(r);
+    
+    return tnode;
+}
+
+//Insert Aadhar Node Function
+Aadhar_Node* Insert_Aadhar(Aadhar_Node* root,Aadhar_Node* nptr)
+{
+    Aadhar_Node* ret = root;
+    int flag = 0;
+
+    if(root==NULL)
+    {
+        ret = nptr;
+    }
+    else
+    {
+        if(strcmp(nptr->aadhar_no,root->aadhar_no) < 0)
+        {
+            if(root->left!=NULL)
+            {
+                root->left = Insert_Aadhar(root->left,nptr);
+                flag = 1;
+            }
+            else
+            {
+                root->left = nptr;
+            }
+            Calculate_Bf_Aadhar(root);
+        }
+        else if(strcmp(nptr->aadhar_no,root->aadhar_no) > 0)
+        {
+            if(root->right!=NULL)
+            {
+                root->right = Insert_Aadhar(root->right,nptr);
+                flag = 1;
+            }
+            else
+            {
+                root->right = nptr;
+            }
+            Calculate_Bf_Aadhar(root);
+        }
+        else{
+            printf("Duplicate Element!!\n");
+        }
+
+        //Make AVL
+        if(flag == 1)
+        {
+            if(root->bf > 1)
+            {
+                if(root->right->bf >= 1)
+                {
+                    ret = RotateLeft_Aadhar(root);
+                }
+                else if(root->right->bf <= -1)
+                {
+                    root->right = RotateRight_Aadhar(root->right);
+                    ret = RotateLeft_Aadhar(root);                     
+                }
+            }
+            else if(root->bf < -1)
+            {
+                if(root->left->bf <= -1)
+                {
+                    ret = RotateRight_Aadhar(root);
+                }
+                else if(root->left->bf >= 1)
+                {
+                    root->left = RotateLeft_Aadhar(root->left);
+                    ret = RotateRight_Aadhar(root);
+                }
+            }
+        }
+    }
+    return ret;
+}
+
+//Insert Pan Node Function
+Pan_Node* Insert_Pan(Pan_Node* root,Pan_Node* nptr)
+{
+    Pan_Node* ret = root;
+    int flag = 0;
+
+    if(root==NULL)
+    {
+        ret = nptr;
+    }
+    else
+    {
+        if(strcmp(nptr->pan_no,root->pan_no) < 0)
+        {
+            if(root->left!=NULL)
+            {
+                root->left = Insert_Pan(root->left,nptr);
+                flag = 1;
+            }
+            else{
+                root->left = nptr;
+            }
+            Calculate_Bf_Pan(root);
+        }
+        else if(strcmp(nptr->pan_no,root->pan_no) > 0)
+        {
+            if(root->right!=NULL)
+            {
+                root->right = Insert_Pan(root->right,nptr);
+                flag = 1;
+            }
+            else
+            {
+                root->right = nptr;
+            }
+            Calculate_Bf_Pan(root);
+        }
+        else{
+            printf("Duplicate Element!!\n");
+        }
+
+        //Make AVL
+        if(flag == 1)
+        {
+            if(root->bf > 1)
+            {
+                if(root->right->bf >= 1)
+                {
+                    ret = RotateLeft_Pan(root);
+                }
+                else if(root->right->bf <= -1)
+                {
+                    root->right = RotateRight_Pan(root->right);
+                    ret = RotateLeft_Pan(root);                     
+                }
+            }
+            else if(root->bf < -1)
+            {
+                if(root->left->bf <= -1)
+                {
+                    ret = RotateRight_Pan(root);
+                }
+                else if(root->left->bf >= 1)
+                {
+                    root->left = RotateLeft_Pan(root->left);
+                    ret = RotateRight_Pan(root);
+                }
+            }
+        }
+    }
+    return ret;
+}
+
+//Insert Bank Node Function
+Bank_Acc_Node* Insert_Bank(Bank_Acc_Node* root,Bank_Acc_Node* nptr)
+{
+    Bank_Acc_Node* ret = root;
+    int flag = 0;
+
+    if(root==NULL)
+    {
+        ret = nptr;
+    }
+    else
+    {
+        if(strcmp(nptr->bank_acc_no,root->bank_acc_no) < 0)
+        {
+            if(root->left!=NULL)
+            {
+                root->left = Insert_Bank(root->left,nptr);
+                flag = 1;
+            }
+            else
+            {
+                root->left = nptr;
+            }
+            Calculate_Bf_Bank(root);
+        }
+        else if(strcmp(nptr->bank_acc_no,root->bank_acc_no) > 0)
+        {
+            if(root->right!=NULL)
+            {
+                root->right = Insert_Bank(root->right,nptr);
+                flag = 1;
+            }
+            else
+            {
+                root->right = nptr;
+            }
+            Calculate_Bf_Bank(root);
+        }
+        else
+        {
+            printf("Duplicate Element!!\n");
+        }
+
+        //Make AVL
+        if(flag == 1)
+        {
+            if(root->bf > 1)
+            {
+                if(root->right->bf >= 1)
+                {
+                    ret = RotateLeft_Bank(root);
+                }
+                else if(root->right->bf <= -1)
+                {
+                    root->right = RotateRight_Bank(root->right);
+                    ret = RotateLeft_Bank(root);                     
+                }
+            }
+            else if(root->bf < -1)
+            {
+                if(root->left->bf <= -1)
+                {
+                    ret = RotateRight_Bank(root);
+                }
+                else if(root->left->bf >= 1)
+                {
+                    root->left = RotateLeft_Bank(root->left);
+                    ret = RotateRight_Bank(root);
+                }
+            }
+        }
+    }
+    return ret;
+}
+
+//Insert Lpg Node Function
+LPG_Node* Insert_Lpg(LPG_Node* root,LPG_Node* nptr)
+{
+    LPG_Node* ret = root;
+    int flag = 0;
+
+    if(root==NULL)
+    {
+        ret = nptr;
+    }
+    else
+    {
+        if(strcmp(nptr->bank_acc_no,root->bank_acc_no) < 0)
+        {
+            if(root->left!=NULL)
+            {
+                root->left = Insert_Lpg(root->left,nptr);
+                flag = 1;
+            }
+            else
+            {
+                root->left = nptr;
+            }
+            Calculate_Bf_Lpg(root);
+        }
+        else if(strcmp(nptr->bank_acc_no,root->bank_acc_no) > 0)
+        {
+            if(root->right!=NULL)
+            {
+                root->right = Insert_Lpg(root->right,nptr);
+                flag = 1;
+            }
+            else
+            {
+                root->right = nptr;
+            }
+            Calculate_Bf_Lpg(root);
+        }
+        else
+        {
+            printf("Duplicate Element!!\n");
+        }
+
+        //Make AVL
+        if(flag == 1)
+        {
+            if(root->bf > 1)
+            {
+                if(root->right->bf >= 1)
+                {
+                    ret = RotateLeft_Lpg(root);
+                }
+                else if(root->right->bf <= -1)
+                {
+                    root->right = RotateRight_Lpg(root->right);
+                    ret = RotateLeft_Lpg(root);                     
+                }
+            }
+            else if(root->bf < -1)
+            {
+                if(root->left->bf <= -1)
+                {
+                    ret = RotateRight_Lpg(root);
+                }
+                else if(root->left->bf >= 1)
+                {
+                    root->left = RotateLeft_Lpg(root->left);
+                    ret = RotateRight_Lpg(root);
+                }
+            }
+        }
+    }
+    return ret;
+}
+
+//Read Aadhar File Function
+Aadhar_Node* Read_Aadhar(Aadhar_Node* A_root)
+{
+    FILE* fp;
+    fp=fopen("aadhar.csv","r");
+    Aadhar_Node*tail;
+
+    if(!fp)
+    {
+        perror("Error opening Aadhar File!!\n");
+    }
+    else
+    {   
+        char row[200];
+        //printf("Aadhar File Opened!!\n");
+
+        while(fgets(row,sizeof(row),fp)!=NULL)
+        {
+            char* token = strtok(row,",");
+
+            Aadhar_Node * nptr = Create_Aadhar_Node();
+            strcpy(nptr->name,token);
+
+            token=strtok(NULL,",");
+            strcpy(nptr->address,token);
+
+            token=strtok(NULL,",");
+            strcpy(nptr->aadhar_no,token);
+
+            //Insertion in tree req!!
+            A_root = Insert_Aadhar(A_root,nptr);
+        }
+        printf("Aadhar Data Fetched Successfully :)\n");
+    }
+    fclose(fp);
+    return A_root;
+}
+
+//Read Pan File Function
+Pan_Node* Read_Pan(Pan_Node *P_root)
+{
+    FILE* fp;
+    fp=fopen("pan.csv","r");
+
+    if(!fp)
+    {
+        perror("Error opening Pan File!!\n");
+    }
+    else
+    {   
+        char row[200];
+        //printf("Pan File Opened!!\n");
+
+        while(fgets(row,sizeof(row),fp)!=NULL)
+        {
+            char* token = strtok(row,",");
+
+            Pan_Node* nptr = Create_Pan_Node();
+
+            strcpy(nptr->name,token);
+
+            token=strtok(NULL,",");
+            strcpy(nptr->address,token);
+
+            token=strtok(NULL,",");
+            strcpy(nptr->pan_no,token);
+
+            token=strtok(NULL,",");
+            strcpy(nptr->aadhar_no,token);
+
+            //Insertion in tree req!!
+            P_root = Insert_Pan(P_root,nptr);
+        }
+        printf("Pan Data Fetched Successfully :)\n");
+    }
+    fclose(fp);
+    return P_root;
+}
+
+//Read Bank Accounts File Function
+Bank_Acc_Node* Read_Bank(Bank_Acc_Node *B_root, FILE* fp)
+{
+    if(fp != NULL)
+    {
+        //printf("Bank file opened succesfully!!\n");
+        char row[200];
+
+        while(fgets(row,sizeof(row),fp))
+        {
+            Bank_Acc_Node* nptr = Create_Bank_Node();
+
+            char*token = strtok(row,",");
+            strcpy(nptr->name,token);
+
+            token=strtok(NULL,",");
+            strcpy(nptr->bank_name,token);
+
+            token=strtok(NULL,",");
+            strcpy(nptr->bank_acc_no,token);
+
+            token=strtok(NULL,",");
+            strcpy(nptr->pan_no,token);
+
+            token=strtok(NULL,",");
+            nptr->balance=atoi(token);
+
+            //Insertion in tree req!!
+            B_root = Insert_Bank(B_root,nptr);
+        }
+        printf("Bank Data fetched successfully :)\n");
+    }
+    fclose(fp);
+    return B_root;
+}
+
+//Read Lpg File Function
+LPG_Node* Read_Lpg(LPG_Node *L_root)
+{
+    FILE *fp;
+    fp = fopen("lpg.csv","r");
+
+    if(fp != NULL)
+    {
+        char row[200];
+
+        while(fgets(row,sizeof(row),fp))
+        {
+            LPG_Node* nptr = Create_Lpg_Node();
+
+            char *token=strtok(row,",");
+            strcpy(nptr->name,token);
+
+            token=strtok(NULL,",");
+            strcpy(nptr->bank_acc_no,token);
+
+            token=strtok(NULL,",");
+
+            if(strcmp(token,"YES")==0)
+            {
+                nptr->subsidy=YES;
+            }
+            else
+            {
+                nptr->subsidy=NO;
+            }
+
+            //insertion in tree req!!
+            L_root = Insert_Lpg(L_root,nptr);
+        }
+        printf("Lpg subsidy data fetched successfully :)\n");
+    }
+    fclose(fp);
+    return L_root;
+}
+
+//Print Aadhar Tree Function
+void Print_Aadhar(Aadhar_Node* root)
+{
+    //printing in inorder style
+    static int i=1;
+    if(root != NULL)
+    {
+        Print_Aadhar(root->left);
+
+        printf("%d)Name: %s\n",i,root->name);
+        printf("  Address: %s\n",root->address);
+        printf("  Aadhar No.: %s\n",root->aadhar_no);
+        printf("bf: %d\n",root->bf);
+        printf("\n");
+        i++;
+
+        Print_Aadhar(root->right);
+    }
+}
+
+//Print Pan Tree Function
+void Print_Pan(Pan_Node* root)
+{
+    //printing in inorder style
+    static int i=1;
+    if(root != NULL)
+    {
+        Print_Pan(root->left);
+
+        printf("%d)Name: %s\n",i,root->name);
+        printf("  Address: %s\n",root->address);
+        printf("  Aadhar No.: %s\n",root->aadhar_no);
+        printf("  Pan No.: %s\n",root->pan_no);
+        printf("bf: %d\n",root->bf);
+        printf("\n");
+        i++;
+
+        Print_Pan(root->right);
+    }
+}
+
+//Print Bank Tree Function
+void Print_Bank(Bank_Acc_Node* root)
+{
+    //printing in inorder style
+    static int i=1;
+    if(root != NULL)
+    {
+        Print_Bank(root->left);
+
+        printf("%d)Name: %s\n",i,root->name);
+        printf("  Bank Name: %s\n",root->bank_name);
+        printf("  Amount Deposited: %d\n",root->balance);
+        printf("  Account No:- %s\n",root->bank_acc_no);
+        printf("bf: %d\n",root->bf);
+        printf("\n");
+        i++;
+
+        Print_Bank(root->right);
+    }
+}
+
+//Print Lpg Tree Function
+void Print_Lpg(LPG_Node* root)
+{
+    //printing in inorder style
+    static int i=1;
+    if(root != NULL)
+    {
+        Print_Lpg(root->left);
+
+        printf("%d)Name: %s\n",i,root->name);
+        printf("  Bank Acc No: %s\n",root->bank_acc_no);
+        //printf("  Subsidy: %s\n",root->subsidy);
+        printf("bf: %d\n",root->bf);
+        printf("\n");
+        i++;
+
+        Print_Lpg(root->right);
+    }
+}
+
+//Question 1:Aadhar without pan
+int Search_Aadhar1(Pan_Node* P_root,char key[],int b)
+{
+    if(P_root != NULL)
+    {
+        if(strcmp(P_root->aadhar_no,key) == 0)
+        {
+            b++;
+        }
+        else
+        {
+            b = Search_Aadhar1(P_root->left,key,b);
+            b = Search_Aadhar1(P_root->right,key,b);
+        }
+    }
+    return b;
+}
+void Ques1(Aadhar_Node* A_root,Pan_Node* P_root,FILE* fp)
+{
+    static int i = 1;
+    if(A_root != NULL && P_root !=NULL)
+    {
+        Ques1(A_root->left,P_root,fp);
+
+        int b = 0;
+        b = Search_Aadhar1(P_root,A_root->aadhar_no,b);
+
+        if(b == 0)
+        {
+            //print details
+            fprintf(fp,"%d)Name: %s\n",i,A_root->name);
+            fprintf(fp,"  Address: %s\n",A_root->address);
+            fprintf(fp,"  Aadhar No.: %s\n",A_root->aadhar_no);
+            i++;
+            fprintf(fp,"\n");
+        }
+
+        Ques1(A_root->right,P_root,fp);
+    }
+}
+
+//Question 2:Details of people with multiple pan
+int Search_Aadhar2(Pan_Node* P_root,char key[],int b)
+{
+    if(P_root != NULL)
+    {
+        if(strcmp(P_root->aadhar_no,key) == 0)
+        {
+            b++;
+            b = Search_Aadhar2(P_root->left,key,b);
+            b = Search_Aadhar2(P_root->right,key,b);
+        }
+        else
+        {
+            b = Search_Aadhar2(P_root->left,key,b);
+            b = Search_Aadhar2(P_root->right,key,b);
+        }
+    }
+    return b;
+}
+void Ques2(Aadhar_Node* A_root,Pan_Node* P_root,FILE* fp)
+{
+    static int i = 1;
+    if(A_root != NULL && P_root !=NULL)
+    {
+        Ques2(A_root->left,P_root,fp);
+
+        int b = 0;
+        b = Search_Aadhar2(P_root,A_root->aadhar_no,b);
+
+        if(b > 1)
+        {
+            //print details
+            fprintf(fp,"%d)Name: %s\n",i,A_root->name);
+            fprintf(fp,"   Address: %s\n",A_root->address);
+            fprintf(fp,"   Aadhar No.: %s\n",A_root->aadhar_no);
+            i++;
+            fprintf(fp,"\n");
+        }
+
+        Ques2(A_root->right,P_root,fp);
+    }
+}
+
+int main()
+{
+    Aadhar_Node* A_root = NULL;
+    A_root = Read_Aadhar(A_root);
+    Print_Aadhar(A_root);
+    
+    Pan_Node* P_root = NULL;
+    P_root = Read_Pan(P_root);
+    Print_Pan(P_root);
+
+    LPG_Node* L_root = NULL;
+    L_root = Read_Lpg(L_root);
+    Print_Lpg(L_root);
+    
+    Bank_Acc_Node *B_root = NULL;
+    FILE* fp;
+    fp=fopen("bank.csv","r");
+    B_root = Read_Bank(B_root,fp);
+    Print_Bank(B_root);
+
+    printf("Ques1 called!!\n");
+    FILE* fp1 = fopen("Ques1.txt","w");
+    Ques1(A_root,P_root,fp);
+    fclose(fp1);
+
+    printf("Ques2 called!!\n");
+    FILE* fp2 = fopen("Ques2.txt","w");
+    Ques2(A_root,P_root,fp);
+    fclose(fp2);
+
+    return 0;
+}
